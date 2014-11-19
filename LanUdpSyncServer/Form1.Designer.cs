@@ -68,7 +68,6 @@
             this.buttonSetName.TabIndex = 0;
             this.buttonSetName.Text = "Set";
             this.buttonSetName.UseVisualStyleBackColor = true;
-            this.buttonSetName.Click += new System.EventHandler(this.buttonSetName_Click);
             // 
             // label1
             // 
@@ -80,7 +79,6 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "label1";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label1.Click += new System.EventHandler(this.panel1_Click);
             // 
             // panel1
             // 
@@ -92,7 +90,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(428, 239);
             this.panel1.TabIndex = 2;
-            this.panel1.Click += new System.EventHandler(this.panel1_Click);
             // 
             // Form1
             // 

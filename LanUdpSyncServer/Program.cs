@@ -15,13 +15,9 @@ namespace LanUdpSyncServer
         [STAThread]
         static void Main()
         {
-            // Application.EnableVisualStyles();
-            // Application.SetCompatibleTextRenderingDefault(false);
-            // Application.Run(new Form1());
-
-            LanTimeSyncServer s = new LanTimeSyncServer();
-            s.BeginListening("ServierOne");
-            Console.ReadLine();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
         }
 
         public static double ToUnixTimestamp(this DateTime value)

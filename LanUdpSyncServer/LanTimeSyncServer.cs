@@ -37,18 +37,26 @@ namespace LanUdpSyncServer
         // 0 1 2 3 4  5 6 7 8
         // R t1t1t1t1 t2t2t2t2
 
-        public void BeginListening()
+        public IPEndPoint BeginListening()
         {
-            Console.Write("Listening..");
-            Recall(_listenerName);
-            Recall(_listenerTime);
-            Console.WriteLine("started");
+            try
+            {
+                Recall(_listenerName);
+                Recall(_listenerTime);
+                ServerName = ((IPEndPoint)_listenerTime.Client.LocalEndPoint).Address.ToString();
+                return (IPEndPoint)_listenerTime.Client.LocalEndPoint;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
-        public void BeginListening(string serverName)
+        public IPEndPoint BeginListening(string serverName)
         {
+            IPEndPoint r = BeginListening();
             this._serverName = serverName;
-            BeginListening();
+            return r;
         }
 
         void Received(IAsyncResult r)
@@ -56,10 +64,10 @@ namespace LanUdpSyncServer
             IPEndPoint e = new IPEndPoint(IPAddress.Any, 0);
             byte[] b = ((UdpClient)r.AsyncState).EndReceive(r, ref e);
             long t2 = (long)(DateTime.Now.ToUnixTimestamp() * 1000);
-            Console.Write("[{0}] {1}:{2} Request ", DateTime.Now.ToUnixTimestamp(), e.Address.ToString(), e.Port.ToString());
+            
             if (b[0] == _reqTime)
             {
-                Console.WriteLine("_reqTime");
+                OnEventHappened(_reqTime, e.Address.ToString() + ":" + e.Port.ToString());
                 long t1;
                 if (BitConverter.IsLittleEndian)
                 {
@@ -79,22 +87,17 @@ namespace LanUdpSyncServer
                 ((UdpClient)r.AsyncState).Send(b, b.Length, e);
                 Recall(r.AsyncState);
                 _pings++;
-                if (_pings == 100)
-                    Console.WriteLine("100th ping", _pings);
             }
             else if (b[0] == _reqName)
             {
-                Console.WriteLine("_reqName");
+                OnEventHappened(_reqName, e.Address.ToString() + ":" + e.Port.ToString());
                 Recall(r.AsyncState);
                 b = Encoding.ASCII.GetBytes(_serverName);
                 ((UdpClient)r.AsyncState).Send(b, b.Length, new IPEndPoint(e.Address, nameAnsPort));
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Received {0}", b[0]);
-                Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.Gray;
+                OnEventHappened(4, "Problem: received a " + b[0] + " there may be an other network application that works on the same channel.");
                 Recall(r.AsyncState);
             }
             
@@ -105,5 +108,12 @@ namespace LanUdpSyncServer
             ((UdpClient)r).BeginReceive(new AsyncCallback(Received), ((UdpClient)r));
         }
 
+        void OnEventHappened(int i, string m)
+        {
+            if (EventHappened != null)
+                EventHappened.Invoke(i, m);
+        }
+
+        public event Action<int, string> EventHappened;
 	}
 }

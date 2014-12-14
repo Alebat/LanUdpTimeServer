@@ -49,7 +49,7 @@ namespace LanUdpSyncServer
                     t += @" (2) times\par}";
                 else if (_lastn > 2)
                 {
-                    t = t.Remove(t.LastIndexOf(" (")) + @" (" + _lastn + @") times\par\par}";
+                    t = t.Remove(t.LastIndexOf(" (")) + @" (" + (_lastn + 1) + @") times\par\par}";
                 }
                 _lastn++;
             }

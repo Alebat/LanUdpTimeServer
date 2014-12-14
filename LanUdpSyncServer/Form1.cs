@@ -3,6 +3,7 @@ using System.Net;
 using System;
 using System.Drawing;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 
 namespace LanUdpSyncServer
 {
@@ -18,14 +19,14 @@ namespace LanUdpSyncServer
 {\colortbl ;\red0\green0\blue0;\red0\green50\blue150;\red200\green75\blue0;\red0\green150\blue0;}
 {\fonttbl{\f0\fnil\fcharset0 Lucida Console;}}
 \f0\fs1\cf1 .\cf2 .\cf3 .\cf4 .\par\fs24\b Udp Sync Server\par\fs20\b0 v1.1\par\par}";
-            AppendRtf(@"\cf1\fs20\b0 Listening..");
+            AppendRtf(@"\cf1\fs20\b0 Listening...\par");
             t.EventHappened += t_EventHappened;
             lep = t.BeginListening("For PhisioREC on " + t.ServerName);
             if (lep != null)
             {
                 string ip = lep.Address.ToString();
-                AppendRtf(@"\cf2 started\par\cf1 The interface is the " + ip + @" one.\par");
-                textBox1.Text = LocalIPAddress();
+                AppendRtf(@"\cf2\fs20 Started\par\cf1 The interface is the " + ip + @" one.\par");
+                textBox1.Text = GetLocalIPv4(NetworkInterfaceType.Wireless80211);
             }
             else
             {
@@ -54,30 +55,32 @@ namespace LanUdpSyncServer
             }
             else
             {
-                t += rtf;
-                t += @"\par}";
+                t += String.Format(@"\cf1\fs16\b0 {0} {1}\par}}", DateTime.Now.ToLongTimeString(), rtf);
 
                 _lastn = 1;
                 _lastm = rtf;
             }
             richTextBox1.Rtf = t;
-            richTextBox1.AutoScrollOffset = p;
+            richTextBox1.AutoScrollOffset = new Point(p.X, int.MaxValue);
         }
 
-        public string LocalIPAddress()
+        public string GetLocalIPv4(NetworkInterfaceType _type)
         {
-            IPHostEntry host;
-            string localIP = "";
-            host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in host.AddressList)
+            string output = "";
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                if (item.NetworkInterfaceType == _type && item.OperationalStatus == OperationalStatus.Up)
                 {
-                    localIP = ip.ToString();
-                    break;
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            output = ip.Address.ToString();
+                        }
+                    }
                 }
             }
-            return localIP;
+            return output;
         }
 
         void t_EventHappened(int arg1, string arg2)
@@ -93,16 +96,16 @@ namespace LanUdpSyncServer
             switch (arg1)
             {
                 case 4:
-                    AppendRtf(String.Format(@"\cf3\fs20\b0 {0}\b {1}\par", DateTime.Now.ToShortTimeString(), arg2));
+                    AppendRtf(String.Format(@"\cf3\fs20\b {0}\par", arg2));
                     break;
                 case _reqName: // IP
-                    AppendRtf(String.Format(@"\cf4\fs20\b0 {0} {1} requested the name\par", DateTime.Now.ToLongTimeString(), arg2));
+                    AppendRtf(String.Format(@"\cf4\fs20\b0 {0} requested the name\par", arg2));
                     break;
                 case _reqTime: // IP
-                    AppendRtf(String.Format(@"\cf4\fs20\b0 {0} {1} requested the time\par", DateTime.Now.ToLongTimeString(), arg2));
+                    AppendRtf(String.Format(@"\cf4\fs20\b0 {0} requested the time\par", arg2));
                     break;
                 default:
-                    AppendRtf(String.Format(@"\cf2\fs20\b0 {0} {1}\par", DateTime.Now.ToShortTimeString(), arg2));
+                    AppendRtf(String.Format(@"\cf2\fs20\b0 {0}\par", arg2));
                     break;
             }
         }

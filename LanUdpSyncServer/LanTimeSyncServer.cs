@@ -61,7 +61,7 @@ namespace LanUdpSyncServer
 
         void Received(IAsyncResult r)
         {
-            long t2 = (long)(DateTime.Now.ToUnixTimestamp() * 1000);
+            long t2 = (long)(DateTime.UtcNow.ToUnixTimestamp() * 1000);
             IPEndPoint e = new IPEndPoint(IPAddress.Any, 0);
             byte[] b = ((UdpClient)r.AsyncState).EndReceive(r, ref e);
             
@@ -82,7 +82,7 @@ namespace LanUdpSyncServer
                 b = b.Concat((t2 - t1).GetBytes()).ToArray();
 
                 e.Port = timePort;
-                long t3 = (long)(DateTime.Now.ToUnixTimestamp() * 1000);
+                long t3 = (long)(DateTime.UtcNow.ToUnixTimestamp() * 1000);
                 b = b.Concat(t3.GetBytes()).ToArray();
                 ((UdpClient)r.AsyncState).Send(b, b.Length, e);
                 Recall(r.AsyncState);

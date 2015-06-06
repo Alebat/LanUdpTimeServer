@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LanUdpSyncServer
 {
-    public class LanTimeSyncServer
+    class LanTimeSyncServer
     {
         const int timePort = 12865;
         const int namePort = 12866;

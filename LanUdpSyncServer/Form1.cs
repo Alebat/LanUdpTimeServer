@@ -25,25 +25,8 @@ namespace LanUdpSyncServer
             if (lep != null)
             {
                 string ip = lep.Address.ToString();
-                AppendRtf(@"\cf2\fs20 Started\par\cf1 Local EP: " + ip + @"\par");
-                NetworkInterfaceType nit = NetworkInterfaceType.Wireless80211;
-                textBox1.Text = GetLocalIPv4(ref nit);
-                label1.Text = nit == NetworkInterfaceType.Wireless80211 ? "WiFi" : nit.ToString();
-                switch (nit)
-                {
-                    case NetworkInterfaceType.Ethernet:
-                    case NetworkInterfaceType.Ethernet3Megabit:
-                    case NetworkInterfaceType.FastEthernetFx:
-                    case NetworkInterfaceType.FastEthernetT:
-                    case NetworkInterfaceType.Fddi:
-                    case NetworkInterfaceType.GigabitEthernet:
-                    case NetworkInterfaceType.Tunnel:
-                    case NetworkInterfaceType.Wireless80211:
-                        break;
-                    default:
-                        AppendRtf(@"\cf3\fs20 Somehing may not work with this interface type: " + nit.ToString() + @"\par");
-                        break;
-                }
+                AppendRtf(@"\cf2\fs20 Started\par\cf1 The interface is the " + ip + @" one.\par");
+                textBox1.Text = GetLocalIPv4(NetworkInterfaceType.Wireless80211);
             }
             else
             {
@@ -81,33 +64,22 @@ namespace LanUdpSyncServer
             richTextBox1.AutoScrollOffset = new Point(p.X, int.MaxValue);
         }
 
-        public string GetLocalIPv4(ref NetworkInterfaceType _type)
+        public string GetLocalIPv4(NetworkInterfaceType _type)
         {
             string output = "";
-            bool found = false;
-            bool filter = true;
-            do
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
             {
-                foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
-                    if (item.OperationalStatus == OperationalStatus.Up
-                        && (!filter || item.NetworkInterfaceType == _type))
-                        foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
-                            if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                            {
-                                if (found)
-                                    output += ";";
-                                output += ip.Address.ToString();
-                                if (!filter)
-                                    _type = item.NetworkInterfaceType;
-                                found = true;
-                            }
-                if (!filter && !found)
+                if (item.NetworkInterfaceType == _type && item.OperationalStatus == OperationalStatus.Up)
                 {
-                    output = "No interface available!!!";
-                    break;
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            output = ip.Address.ToString();
+                        }
+                    }
                 }
-                filter = false;
-            } while (!found);
+            }
             return output;
         }
 

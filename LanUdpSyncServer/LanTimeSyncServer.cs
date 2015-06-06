@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LanUdpSyncServer
 {
-    class LanTimeSyncServer
+    public class LanTimeSyncServer
     {
         const int timePort = 12865;
         const int namePort = 12866;
@@ -19,7 +19,7 @@ namespace LanUdpSyncServer
         UdpClient _listenerTime = new UdpClient(timePort);
         UdpClient _listenerName = new UdpClient(namePort);
         IPEndPoint _groupEP = new IPEndPoint(IPAddress.Any,timePort);
-        string _serverName = "time-server-from-" + DateTime.Now.ToShortTimeString().Replace(":", "-");
+        string _serverName = "time-server-from-" + DateTime.UtcNow.ToShortTimeString().Replace(":", "-");
 
         int _pings = 0;
 
